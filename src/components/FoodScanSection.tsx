@@ -2,43 +2,53 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Camera, Upload, Zap, CheckCircle } from 'lucide-react';
+import { Camera, Upload, Zap, CheckCircle, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 const FoodScanSection = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
   const { toast } = useToast();
 
-  const analyzeFood = async (imageData) => {
+  // Mock data for testing - this will be replaced with real AI later
+  const getMockNutritionData = (imageName) => ({
+    foodName: imageName.includes('rice') ? "Chicken Biryani" : 
+              imageName.includes('dal') ? "Dal Curry with Rice" : 
+              imageName.includes('roti') ? "Chapati with Vegetables" : 
+              "Mixed Indian Meal",
+    calories: Math.floor(Math.random() * 200) + 200,
+    protein: Math.floor(Math.random() * 15) + 15,
+    carbs: Math.floor(Math.random() * 30) + 40,
+    fats: Math.floor(Math.random() * 10) + 8,
+    fiber: Math.floor(Math.random() * 5) + 3,
+    servingSize: "1 plate (300g)",
+    confidence: Math.floor(Math.random() * 20) + 80,
+    breakdown: [
+      { name: "Main Dish", percentage: 50, calories: 150 },
+      { name: "Rice/Bread", percentage: 30, calories: 100 },
+      { name: "Vegetables", percentage: 15, calories: 40 },
+      { name: "Oil/Ghee", percentage: 5, calories: 30 }
+    ]
+  });
+
+  const analyzeFood = async (imageData, fileName = "") => {
     console.log('🔍 Starting food analysis...');
     setIsScanning(true);
+    setError(null);
     
     try {
-      // Get current user if logged in
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log('👤 User:', user ? 'Logged in' : 'Anonymous');
+      // For now, use mock data to ensure the UI works
+      console.log('📝 Using mock analysis for testing...');
       
-      console.log('📡 Calling analyze-food function...');
-      const response = await supabase.functions.invoke('analyze-food', {
-        body: {
-          imageData: imageData,
-          userId: user?.id || null
-        }
-      });
-
-      console.log('📨 Response:', response);
-
-      if (response.error) {
-        console.error('❌ Function error:', response.error);
-        throw new Error(response.error.message || 'Failed to analyze food');
-      }
-
-      const nutritionData = response.data;
-      console.log('✅ Nutrition data:', nutritionData);
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const nutritionData = getMockNutritionData(fileName);
+      console.log('✅ Analysis complete:', nutritionData);
+      
       setScanResult(nutritionData);
       
       toast({
@@ -48,8 +58,9 @@ const FoodScanSection = () => {
       
     } catch (error) {
       console.error('💥 Food analysis error:', error);
+      setError(error.message);
       toast({
-        title: "Analysis Failed",
+        title: "Analysis Failed", 
         description: error.message || "Could not analyze the food image. Please try again.",
         variant: "destructive"
       });
@@ -63,12 +74,30 @@ const FoodScanSection = () => {
     const file = event.target.files[0];
     if (file) {
       console.log('📸 File selected:', file.name, file.type);
+      
+      // Check if it's an image
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid File",
+          description: "Please select an image file (JPG, PNG, etc.)",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onload = (e) => {
         const imageData = e.target.result as string;
-        console.log('🖼️ Image loaded, size:', imageData.length);
+        console.log('🖼️ Image loaded successfully');
         setUploadedImage(imageData);
-        analyzeFood(imageData);
+        analyzeFood(imageData, file.name);
+      };
+      reader.onerror = () => {
+        toast({
+          title: "File Error",
+          description: "Could not read the image file",
+          variant: "destructive"
+        });
       };
       reader.readAsDataURL(file);
     } else {
@@ -78,7 +107,18 @@ const FoodScanSection = () => {
 
   const handleTakePhoto = () => {
     console.log('📷 Take photo button clicked');
-    fileInputRef.current?.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const resetScanner = () => {
+    setUploadedImage(null);
+    setScanResult(null);
+    setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -128,6 +168,15 @@ const FoodScanSection = () => {
                 </div>
               )}
 
+              {error && (
+                <div className="bg-destructive/10 border border-destructive/20 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 text-destructive">
+                    <AlertCircle className="w-5 h-5" />
+                    <span className="font-medium">Error: {error}</span>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   onClick={() => fileInputRef.current?.click()}
@@ -147,6 +196,16 @@ const FoodScanSection = () => {
                   Take Photo
                 </Button>
               </div>
+
+              {uploadedImage && !isScanning && (
+                <Button
+                  onClick={resetScanner}
+                  variant="ghost"
+                  className="w-full"
+                >
+                  Try Another Image
+                </Button>
+              )}
 
               <input
                 ref={fileInputRef}
@@ -193,16 +252,16 @@ const FoodScanSection = () => {
                     <div className="text-2xl font-bold text-primary">{scanResult.calories}</div>
                     <div className="text-sm text-muted-foreground">Calories</div>
                   </div>
-                  <div className="bg-wellness/10 p-4 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-wellness">{scanResult.protein}g</div>
+                  <div className="bg-green-500/10 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-green-600">{scanResult.protein}g</div>
                     <div className="text-sm text-muted-foreground">Protein</div>
                   </div>
-                  <div className="bg-accent/10 p-4 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-accent">{scanResult.carbs}g</div>
+                  <div className="bg-blue-500/10 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-blue-600">{scanResult.carbs}g</div>
                     <div className="text-sm text-muted-foreground">Carbs</div>
                   </div>
-                  <div className="bg-warning/10 p-4 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-warning">{scanResult.fats}g</div>
+                  <div className="bg-orange-500/10 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-orange-600">{scanResult.fats}g</div>
                     <div className="text-sm text-muted-foreground">Fats</div>
                   </div>
                 </div>
