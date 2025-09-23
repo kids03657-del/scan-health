@@ -29,14 +29,32 @@ const Header = () => {
 
           {/* User Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="icon">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => {
+                console.log('🔔 Bell clicked');
+                alert('Notifications feature coming soon!');
+              }}
+            >
               <Bell className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => {
+                console.log('👤 User clicked');
+                alert('Profile feature coming soon!');
+              }}
+            >
               <User className="w-5 h-5" />
             </Button>
             <AuthModal>
-              <Button variant="default" className="bg-primary hover:bg-primary/90">
+              <Button 
+                variant="default" 
+                className="bg-primary hover:bg-primary/90"
+                onClick={() => console.log('🚀 Get Started clicked')}
+              >
                 Get Started
               </Button>
             </AuthModal>

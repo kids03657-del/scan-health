@@ -26,11 +26,26 @@ const HeroSection = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg">
+              <Button 
+                size="lg" 
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg"
+                onClick={() => {
+                  console.log('📷 Try Food Scan clicked');
+                  document.getElementById('scan')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
                 <Camera className="w-5 h-5 mr-2" />
                 Try Food Scan Now
               </Button>
-              <Button variant="outline" size="lg" className="px-8 py-6 text-lg border-2 hover:bg-muted">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="px-8 py-6 text-lg border-2 hover:bg-muted"
+                onClick={() => {
+                  console.log('📊 View Demo clicked');
+                  alert('Demo video coming soon!');
+                }}
+              >
                 <TrendingUp className="w-5 h-5 mr-2" />
                 View Demo
               </Button>

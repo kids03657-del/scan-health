@@ -179,7 +179,12 @@ const FoodScanSection = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <Button
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => {
+                    console.log('📁 Upload button clicked');
+                    if (fileInputRef.current) {
+                      fileInputRef.current.click();
+                    }
+                  }}
                   variant="outline"
                   className="w-full"
                   disabled={isScanning}
@@ -281,7 +286,13 @@ const FoodScanSection = () => {
                   </div>
                 </div>
 
-                <Button className="w-full bg-primary hover:bg-primary/90">
+                <Button 
+                  className="w-full bg-primary hover:bg-primary/90"
+                  onClick={() => {
+                    console.log('📝 Add to Food Diary clicked');
+                    alert(`${scanResult.foodName} added to your food diary!`);
+                  }}
+                >
                   Add to Food Diary
                 </Button>
               </CardContent>
