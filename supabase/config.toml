@@ -10,5 +10,8 @@ max_rows = 1000
 [functions.analyze-food]
 verify_jwt = false
 
+[functions.identify-dish]
+verify_jwt = false
+
 [db]
 port = 54322
