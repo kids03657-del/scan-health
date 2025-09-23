@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Camera, Upload, Zap, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const FoodScanSection = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -12,36 +13,42 @@ const FoodScanSection = () => {
   const fileInputRef = useRef(null);
   const { toast } = useToast();
 
-  const mockNutritionData = {
-    foodName: "Mixed Vegetable Salad with Grilled Chicken",
-    calories: 285,
-    protein: 28,
-    carbs: 12,
-    fats: 15,
-    fiber: 8,
-    servingSize: "1 bowl (250g)",
-    confidence: 94,
-    breakdown: [
-      { name: "Chicken Breast", percentage: 60, calories: 165 },
-      { name: "Mixed Greens", percentage: 25, calories: 45 },
-      { name: "Cherry Tomatoes", percentage: 10, calories: 20 },
-      { name: "Olive Oil Dressing", percentage: 5, calories: 55 }
-    ]
-  };
-
-  const simulateFoodScan = async () => {
+  const analyzeFood = async (imageData) => {
     setIsScanning(true);
     
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    setScanResult(mockNutritionData);
-    setIsScanning(false);
-    
-    toast({
-      title: "Food Recognized!",
-      description: `Found ${mockNutritionData.foodName} with ${mockNutritionData.confidence}% confidence`,
-    });
+    try {
+      // Get current user if logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const response = await supabase.functions.invoke('analyze-food', {
+        body: {
+          imageData: imageData,
+          userId: user?.id || null
+        }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to analyze food');
+      }
+
+      const nutritionData = response.data;
+      setScanResult(nutritionData);
+      
+      toast({
+        title: "Food Analyzed!",
+        description: `Found ${nutritionData.foodName} with ${nutritionData.confidence}% confidence`,
+      });
+      
+    } catch (error) {
+      console.error('Food analysis error:', error);
+      toast({
+        title: "Analysis Failed",
+        description: "Could not analyze the food image. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsScanning(false);
+    }
   };
 
   const handleImageUpload = (event) => {
@@ -49,11 +56,17 @@ const FoodScanSection = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setUploadedImage(e.target.result);
-        simulateFoodScan();
+        const imageData = e.target.result;
+        setUploadedImage(imageData);
+        analyzeFood(imageData);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleTakePhoto = () => {
+    // For demo, we'll use file input. In production, you'd integrate camera API
+    fileInputRef.current?.click();
   };
 
   return (
@@ -114,7 +127,7 @@ const FoodScanSection = () => {
                   Upload Image
                 </Button>
                 <Button
-                  onClick={simulateFoodScan}
+                  onClick={handleTakePhoto}
                   className="w-full bg-primary hover:bg-primary/90"
                   disabled={isScanning}
                 >

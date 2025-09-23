@@ -1,1 +1,14 @@
 project_id = "rcvaowanalqpcguchlvr"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[functions.analyze-food]
+verify_jwt = false
+
+[db]
+port = 54322

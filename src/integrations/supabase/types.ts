@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      food_logs: {
+        Row: {
+          breakdown: Json | null
+          calories: number | null
+          carbs: number | null
+          confidence: number | null
+          created_at: string
+          fats: number | null
+          fiber: number | null
+          food_name: string
+          id: string
+          image_url: string | null
+          protein: number | null
+          serving_size: string | null
+          user_id: string | null
+        }
+        Insert: {
+          breakdown?: Json | null
+          calories?: number | null
+          carbs?: number | null
+          confidence?: number | null
+          created_at?: string
+          fats?: number | null
+          fiber?: number | null
+          food_name: string
+          id?: string
+          image_url?: string | null
+          protein?: number | null
+          serving_size?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          breakdown?: Json | null
+          calories?: number | null
+          carbs?: number | null
+          confidence?: number | null
+          created_at?: string
+          fats?: number | null
+          fiber?: number | null
+          food_name?: string
+          id?: string
+          image_url?: string | null
+          protein?: number | null
+          serving_size?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
