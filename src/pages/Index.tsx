@@ -20,14 +20,16 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Test Button - DELETE THIS AFTER TESTING */}
-      <div className="fixed top-4 right-4 z-50 bg-red-500 p-4 rounded">
+      {/* Test Button - PROPER POSITIONING */}
+      <div className="fixed top-20 left-4 z-[9999] bg-yellow-400 p-2 rounded border-4 border-red-500">
         <Button 
           onClick={handleTestClick}
-          className="bg-green-500 hover:bg-green-600 text-white font-bold"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 text-lg"
+          style={{ minHeight: '50px', minWidth: '200px' }}
         >
-          TEST CLICK ({clickTest})
+          🔥 CLICK TEST ({clickTest}) 🔥
         </Button>
+        <p className="text-black text-sm mt-1">Click me to test!</p>
       </div>
       
       <Header />
