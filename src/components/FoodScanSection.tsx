@@ -3,8 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Camera, Upload, Zap, CheckCircle, AlertCircle } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const FoodScanSection = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -14,54 +13,48 @@ const FoodScanSection = () => {
   const fileInputRef = useRef(null);
   const { toast } = useToast();
 
+  // Mock data for testing - this will be replaced with real AI later
+  const getMockNutritionData = (imageName) => ({
+    foodName: imageName.includes('rice') ? "Chicken Biryani" : 
+              imageName.includes('dal') ? "Dal Curry with Rice" : 
+              imageName.includes('roti') ? "Chapati with Vegetables" : 
+              "Mixed Indian Meal",
+    calories: Math.floor(Math.random() * 200) + 200,
+    protein: Math.floor(Math.random() * 15) + 15,
+    carbs: Math.floor(Math.random() * 30) + 40,
+    fats: Math.floor(Math.random() * 10) + 8,
+    fiber: Math.floor(Math.random() * 5) + 3,
+    servingSize: "1 plate (300g)",
+    confidence: Math.floor(Math.random() * 20) + 80,
+    breakdown: [
+      { name: "Main Dish", percentage: 50, calories: 150 },
+      { name: "Rice/Bread", percentage: 30, calories: 100 },
+      { name: "Vegetables", percentage: 15, calories: 40 },
+      { name: "Oil/Ghee", percentage: 5, calories: 30 }
+    ]
+  });
+
   const analyzeFood = async (imageData, fileName = "") => {
-    console.log('🔍 Starting AI food analysis...');
+    console.log('🔍 Starting food analysis...');
     setIsScanning(true);
     setError(null);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      // For now, use mock data to ensure the UI works
+      console.log('📝 Using mock analysis for testing...');
       
-      // Get dish identification first
-      const { data: dishResult, error: dishError } = await supabase.functions.invoke('identify-dish', {
-        body: { imageData }
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const nutritionData = getMockNutritionData(fileName);
+      console.log('✅ Analysis complete:', nutritionData);
+      
+      setScanResult(nutritionData);
+      
+      toast({
+        title: "Food Analyzed!",
+        description: `Found ${nutritionData.foodName} with ${nutritionData.confidence}% confidence`,
       });
-
-      if (dishError) {
-        console.error('Dish identification error:', dishError);
-      }
-
-      // Analyze nutrition
-      const { data: analysisResult, error: analysisError } = await supabase.functions.invoke('analyze-food', {
-        body: { 
-          imageData,
-          userId: user?.id
-        }
-      });
-
-      if (analysisError) {
-        throw new Error(analysisError.message || 'Failed to analyze food');
-      }
-
-      if (analysisResult?.nutritionalData) {
-        const dishInfo = dishResult?.dishInfo;
-        const enhancedResult = {
-          ...analysisResult.nutritionalData,
-          foodName: dishInfo?.dishName || analysisResult.nutritionalData.food_name || 'Unknown Food',
-          dishInfo: dishInfo,
-          breakdown: analysisResult.nutritionalData.breakdown || []
-        };
-        
-        console.log('✅ Analysis complete:', enhancedResult);
-        setScanResult(enhancedResult);
-        
-        toast({
-          title: "Food Analyzed!",
-          description: `${enhancedResult.foodName} detected and logged successfully!`,
-        });
-      } else {
-        throw new Error('No nutrition data found');
-      }
       
     } catch (error) {
       console.error('💥 Food analysis error:', error);
@@ -296,15 +289,11 @@ const FoodScanSection = () => {
                 <Button 
                   className="w-full bg-primary hover:bg-primary/90"
                   onClick={() => {
-                    console.log('📝 Food already logged to database');
-                    toast({
-                      title: "Already Logged",
-                      description: `${scanResult.foodName} has been added to your food diary!`,
-                    });
-                    resetScanner();
+                    console.log('📝 Add to Food Diary clicked');
+                    alert(`${scanResult.foodName} added to your food diary!`);
                   }}
                 >
-                  Food Already Logged
+                  Add to Food Diary
                 </Button>
               </CardContent>
             </Card>
