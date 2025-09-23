@@ -14,12 +14,15 @@ const FoodScanSection = () => {
   const { toast } = useToast();
 
   const analyzeFood = async (imageData) => {
+    console.log('🔍 Starting food analysis...');
     setIsScanning(true);
     
     try {
       // Get current user if logged in
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('👤 User:', user ? 'Logged in' : 'Anonymous');
       
+      console.log('📡 Calling analyze-food function...');
       const response = await supabase.functions.invoke('analyze-food', {
         body: {
           imageData: imageData,
@@ -27,11 +30,15 @@ const FoodScanSection = () => {
         }
       });
 
+      console.log('📨 Response:', response);
+
       if (response.error) {
+        console.error('❌ Function error:', response.error);
         throw new Error(response.error.message || 'Failed to analyze food');
       }
 
       const nutritionData = response.data;
+      console.log('✅ Nutrition data:', nutritionData);
       setScanResult(nutritionData);
       
       toast({
@@ -40,10 +47,10 @@ const FoodScanSection = () => {
       });
       
     } catch (error) {
-      console.error('Food analysis error:', error);
+      console.error('💥 Food analysis error:', error);
       toast({
         title: "Analysis Failed",
-        description: "Could not analyze the food image. Please try again.",
+        description: error.message || "Could not analyze the food image. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -52,20 +59,25 @@ const FoodScanSection = () => {
   };
 
   const handleImageUpload = (event) => {
+    console.log('📁 File input triggered');
     const file = event.target.files[0];
     if (file) {
+      console.log('📸 File selected:', file.name, file.type);
       const reader = new FileReader();
       reader.onload = (e) => {
-        const imageData = e.target.result;
+        const imageData = e.target.result as string;
+        console.log('🖼️ Image loaded, size:', imageData.length);
         setUploadedImage(imageData);
         analyzeFood(imageData);
       };
       reader.readAsDataURL(file);
+    } else {
+      console.log('❌ No file selected');
     }
   };
 
   const handleTakePhoto = () => {
-    // For demo, we'll use file input. In production, you'd integrate camera API
+    console.log('📷 Take photo button clicked');
     fileInputRef.current?.click();
   };
 
