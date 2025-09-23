@@ -62,6 +62,78 @@ export type Database = {
         }
         Relationships: []
       }
+      health_goals: {
+        Row: {
+          created_at: string
+          daily_calorie_target: number | null
+          daily_protein_target: number | null
+          daily_steps_target: number | null
+          daily_water_target: number | null
+          id: string
+          muscle_gain_target: number | null
+          updated_at: string
+          user_id: string
+          weight_loss_target: number | null
+        }
+        Insert: {
+          created_at?: string
+          daily_calorie_target?: number | null
+          daily_protein_target?: number | null
+          daily_steps_target?: number | null
+          daily_water_target?: number | null
+          id?: string
+          muscle_gain_target?: number | null
+          updated_at?: string
+          user_id: string
+          weight_loss_target?: number | null
+        }
+        Update: {
+          created_at?: string
+          daily_calorie_target?: number | null
+          daily_protein_target?: number | null
+          daily_steps_target?: number | null
+          daily_water_target?: number | null
+          id?: string
+          muscle_gain_target?: number | null
+          updated_at?: string
+          user_id?: string
+          weight_loss_target?: number | null
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          calories_burned: number | null
+          created_at: string
+          date: string
+          id: string
+          steps: number | null
+          updated_at: string
+          user_id: string
+          water_intake: number | null
+        }
+        Insert: {
+          calories_burned?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          steps?: number | null
+          updated_at?: string
+          user_id: string
+          water_intake?: number | null
+        }
+        Update: {
+          calories_burned?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          steps?: number | null
+          updated_at?: string
+          user_id?: string
+          water_intake?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
