@@ -1,19 +1,49 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { TrendingUp, Target, Droplets, Flame, Award } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { TrendingUp, Droplets, Flame, Award, Edit3, Save, X } from 'lucide-react';
 
 const DashboardSection = () => {
-  const todayStats = {
-    caloriesConsumed: 1450,
-    caloriesTarget: 2000,
-    proteinConsumed: 85,
-    proteinTarget: 120,
-    waterIntake: 6,
-    waterTarget: 8,
+  const [quickStats, setQuickStats] = useState({
+    caloriesBurned: 420,
     steps: 8500,
-    stepsTarget: 10000
+    streak: 7
+  });
+  
+  const [healthGoals, setHealthGoals] = useState({
+    weightLoss: 2.5,
+    muscleGain: 1.2,
+    hydrationGoal: 95
+  });
+  
+  const [editingQuickStats, setEditingQuickStats] = useState(false);
+  const [editingHealthGoals, setEditingHealthGoals] = useState(false);
+  
+  const [tempQuickStats, setTempQuickStats] = useState(quickStats);
+  const [tempHealthGoals, setTempHealthGoals] = useState(healthGoals);
+
+  const handleSaveQuickStats = () => {
+    setQuickStats(tempQuickStats);
+    setEditingQuickStats(false);
+  };
+
+  const handleCancelQuickStats = () => {
+    setTempQuickStats(quickStats);
+    setEditingQuickStats(false);
+  };
+
+  const handleSaveHealthGoals = () => {
+    setHealthGoals(tempHealthGoals);
+    setEditingHealthGoals(false);
+  };
+
+  const handleCancelHealthGoals = () => {
+    setTempHealthGoals(healthGoals);
+    setEditingHealthGoals(false);
   };
 
   const weeklyProgress = [
@@ -44,195 +74,282 @@ const DashboardSection = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Today's Overview */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="w-5 h-5 text-primary" />
-                  Today's Progress
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Calories */}
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium">Calories</span>
-                    <span className="text-sm text-muted-foreground">
-                      {todayStats.caloriesConsumed} / {todayStats.caloriesTarget}
-                    </span>
-                  </div>
-                  <Progress 
-                    value={(todayStats.caloriesConsumed / todayStats.caloriesTarget) * 100} 
-                    className="h-3"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>Consumed</span>
-                    <span>{todayStats.caloriesTarget - todayStats.caloriesConsumed} remaining</span>
-                  </div>
-                </div>
-
-                {/* Protein */}
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium">Protein</span>
-                    <span className="text-sm text-muted-foreground">
-                      {todayStats.proteinConsumed}g / {todayStats.proteinTarget}g
-                    </span>
-                  </div>
-                  <Progress 
-                    value={(todayStats.proteinConsumed / todayStats.proteinTarget) * 100} 
-                    className="h-3"
-                  />
-                </div>
-
-                {/* Water Intake */}
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium flex items-center gap-2">
-                      <Droplets className="w-4 h-4 text-accent" />
-                      Water Intake
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {todayStats.waterIntake} / {todayStats.waterTarget} glasses
-                    </span>
-                  </div>
-                  <Progress 
-                    value={(todayStats.waterIntake / todayStats.waterTarget) * 100} 
-                    className="h-3"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Weekly Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-wellness" />
-                  Weekly Calorie Trend
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {weeklyProgress.map((day, index) => (
-                    <div key={index} className="flex items-center gap-4">
-                      <div className="w-12 text-sm font-medium">{day.day}</div>
-                      <div className="flex-1">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span>{day.calories} cal</span>
-                          <span className="text-muted-foreground">Target: {day.target}</span>
-                        </div>
-                        <Progress 
-                          value={(day.calories / day.target) * 100} 
-                          className="h-2"
-                        />
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Weekly Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-wellness" />
+                Weekly Calorie Trend
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {weeklyProgress.map((day, index) => (
+                  <div key={index} className="flex items-center gap-4">
+                    <div className="w-12 text-sm font-medium">{day.day}</div>
+                    <div className="flex-1">
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>{day.calories} cal</span>
+                        <span className="text-muted-foreground">Target: {day.target}</span>
                       </div>
+                      <Progress 
+                        value={(day.calories / day.target) * 100} 
+                        className="h-2"
+                      />
                     </div>
-                  ))}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Nutrition Balance */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Nutrition Balance</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Carbohydrates</span>
+                    <span>{nutritionBalance.carbs}%</span>
+                  </div>
+                  <Progress value={nutritionBalance.carbs} className="h-2" />
                 </div>
+                
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Protein</span>
+                    <span>{nutritionBalance.protein}%</span>
+                  </div>
+                  <Progress value={nutritionBalance.protein} className="h-2" />
+                </div>
+                
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Fats</span>
+                    <span>{nutritionBalance.fats}%</span>
+                  </div>
+                  <Progress value={nutritionBalance.fats} className="h-2" />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                <div className="text-center">
+                  <Badge variant="secondary" className="bg-success/10 text-success">
+                    Balanced Diet
+                  </Badge>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Great macronutrient distribution!
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8 mt-8">
+          {/* Manual Stats */}
+          <div className="space-y-6">
+            {/* Manual Quick Stats */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Quick Stats</CardTitle>
+                  {!editingQuickStats ? (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setEditingQuickStats(true)}
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </Button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={handleSaveQuickStats}
+                      >
+                        <Save className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={handleCancelQuickStats}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {!editingQuickStats ? (
+                  <>
+                    <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Flame className="w-5 h-5 text-primary" />
+                        <span className="font-medium">Calories Burned</span>
+                      </div>
+                      <span className="font-bold text-primary">{quickStats.caloriesBurned}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-wellness/10 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-wellness" />
+                        <span className="font-medium">Steps</span>
+                      </div>
+                      <span className="font-bold text-wellness">{quickStats.steps.toLocaleString()}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-accent/10 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Award className="w-5 h-5 text-accent" />
+                        <span className="font-medium">Streak</span>
+                      </div>
+                      <span className="font-bold text-accent">{quickStats.streak} days</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="calories-burned">Calories Burned</Label>
+                      <Input
+                        id="calories-burned"
+                        type="number"
+                        value={tempQuickStats.caloriesBurned}
+                        onChange={(e) => setTempQuickStats({
+                          ...tempQuickStats,
+                          caloriesBurned: parseInt(e.target.value) || 0
+                        })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="steps">Steps</Label>
+                      <Input
+                        id="steps"
+                        type="number"
+                        value={tempQuickStats.steps}
+                        onChange={(e) => setTempQuickStats({
+                          ...tempQuickStats,
+                          steps: parseInt(e.target.value) || 0
+                        })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="streak">Streak (days)</Label>
+                      <Input
+                        id="streak"
+                        type="number"
+                        value={tempQuickStats.streak}
+                        onChange={(e) => setTempQuickStats({
+                          ...tempQuickStats,
+                          streak: parseInt(e.target.value) || 0
+                        })}
+                      />
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
+
           </div>
 
-          {/* Side Stats */}
+          {/* Manual Health Goals */}
           <div className="space-y-6">
-            {/* Quick Stats */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Quick Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Flame className="w-5 h-5 text-primary" />
-                    <span className="font-medium">Calories Burned</span>
-                  </div>
-                  <span className="font-bold text-primary">420</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-wellness/10 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-wellness" />
-                    <span className="font-medium">Steps</span>
-                  </div>
-                  <span className="font-bold text-wellness">{todayStats.steps.toLocaleString()}</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-accent/10 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Award className="w-5 h-5 text-accent" />
-                    <span className="font-medium">Streak</span>
-                  </div>
-                  <span className="font-bold text-accent">7 days</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Nutrition Balance */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Nutrition Balance</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Carbohydrates</span>
-                      <span>{nutritionBalance.carbs}%</span>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Health Goals</CardTitle>
+                  {!editingHealthGoals ? (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setEditingHealthGoals(true)}
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </Button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={handleSaveHealthGoals}
+                      >
+                        <Save className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={handleCancelHealthGoals}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <Progress value={nutritionBalance.carbs} className="h-2" />
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Protein</span>
-                      <span>{nutritionBalance.protein}%</span>
-                    </div>
-                    <Progress value={nutritionBalance.protein} className="h-2" />
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Fats</span>
-                      <span>{nutritionBalance.fats}%</span>
-                    </div>
-                    <Progress value={nutritionBalance.fats} className="h-2" />
-                  </div>
+                  )}
                 </div>
-
-                <div className="pt-4 border-t">
-                  <div className="text-center">
-                    <Badge variant="secondary" className="bg-success/10 text-success">
-                      Balanced Diet
-                    </Badge>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Great macronutrient distribution!
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Health Goals */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Health Goals</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex items-center gap-3 p-2 bg-primary/5 rounded-lg">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span className="text-sm">Weight Loss: -2.5kg</span>
-                </div>
-                <div className="flex items-center gap-3 p-2 bg-wellness/5 rounded-lg">
-                  <div className="w-2 h-2 bg-wellness rounded-full"></div>
-                  <span className="text-sm">Muscle Gain: +1.2kg</span>
-                </div>
-                <div className="flex items-center gap-3 p-2 bg-accent/5 rounded-lg">
-                  <div className="w-2 h-2 bg-accent rounded-full"></div>
-                  <span className="text-sm">Hydration Goal: 95%</span>
-                </div>
+                {!editingHealthGoals ? (
+                  <>
+                    <div className="flex items-center gap-3 p-2 bg-primary/5 rounded-lg">
+                      <div className="w-2 h-2 bg-primary rounded-full"></div>
+                      <span className="text-sm">Weight Loss: -{healthGoals.weightLoss}kg</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-wellness/5 rounded-lg">
+                      <div className="w-2 h-2 bg-wellness rounded-full"></div>
+                      <span className="text-sm">Muscle Gain: +{healthGoals.muscleGain}kg</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-accent/5 rounded-lg">
+                      <div className="w-2 h-2 bg-accent rounded-full"></div>
+                      <span className="text-sm">Hydration Goal: {healthGoals.hydrationGoal}%</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="weight-loss">Weight Loss Target (kg)</Label>
+                      <Input
+                        id="weight-loss"
+                        type="number"
+                        step="0.1"
+                        value={tempHealthGoals.weightLoss}
+                        onChange={(e) => setTempHealthGoals({
+                          ...tempHealthGoals,
+                          weightLoss: parseFloat(e.target.value) || 0
+                        })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="muscle-gain">Muscle Gain Target (kg)</Label>
+                      <Input
+                        id="muscle-gain"
+                        type="number"
+                        step="0.1"
+                        value={tempHealthGoals.muscleGain}
+                        onChange={(e) => setTempHealthGoals({
+                          ...tempHealthGoals,
+                          muscleGain: parseFloat(e.target.value) || 0
+                        })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="hydration-goal">Hydration Goal (%)</Label>
+                      <Input
+                        id="hydration-goal"
+                        type="number"
+                        value={tempHealthGoals.hydrationGoal}
+                        onChange={(e) => setTempHealthGoals({
+                          ...tempHealthGoals,
+                          hydrationGoal: parseInt(e.target.value) || 0
+                        })}
+                      />
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
