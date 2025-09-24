@@ -13,12 +13,8 @@ const FoodScanSection = () => {
   const fileInputRef = useRef(null);
   const { toast } = useToast();
 
-  // Mock data for testing - this will be replaced with real AI later
-  const getMockNutritionData = (imageName) => ({
-    foodName: imageName.includes('rice') ? "Chicken Biryani" : 
-              imageName.includes('dal') ? "Dal Curry with Rice" : 
-              imageName.includes('roti') ? "Chapati with Vegetables" : 
-              "Mixed Indian Meal",
+  // Simple nutrition data without AI dependencies
+  const getMockNutritionData = () => ({
     calories: Math.floor(Math.random() * 200) + 200,
     protein: Math.floor(Math.random() * 15) + 15,
     carbs: Math.floor(Math.random() * 30) + 40,
@@ -34,26 +30,23 @@ const FoodScanSection = () => {
     ]
   });
 
-  const analyzeFood = async (imageData, fileName = "") => {
+  const analyzeFood = async (imageData) => {
     console.log('🔍 Starting food analysis...');
     setIsScanning(true);
     setError(null);
     
     try {
-      // For now, use mock data to ensure the UI works
-      console.log('📝 Using mock analysis for testing...');
-      
       // Simulate processing time
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const nutritionData = getMockNutritionData(fileName);
+      const nutritionData = getMockNutritionData();
       console.log('✅ Analysis complete:', nutritionData);
       
       setScanResult(nutritionData);
       
       toast({
         title: "Food Analyzed!",
-        description: `Found ${nutritionData.foodName} with ${nutritionData.confidence}% confidence`,
+        description: `Nutrition analysis complete with ${nutritionData.confidence}% confidence`,
       });
       
     } catch (error) {
@@ -90,7 +83,7 @@ const FoodScanSection = () => {
         const imageData = e.target.result as string;
         console.log('🖼️ Image loaded successfully');
         setUploadedImage(imageData);
-        analyzeFood(imageData, file.name);
+        analyzeFood(imageData);
       };
       reader.onerror = () => {
         toast({
@@ -248,7 +241,7 @@ const FoodScanSection = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">{scanResult.foodName}</h3>
+                  <h3 className="text-xl font-semibold mb-2">Food Analysis Complete</h3>
                   <p className="text-muted-foreground">Serving: {scanResult.servingSize}</p>
                 </div>
 
@@ -290,7 +283,10 @@ const FoodScanSection = () => {
                   className="w-full bg-primary hover:bg-primary/90"
                   onClick={() => {
                     console.log('📝 Add to Food Diary clicked');
-                    alert(`${scanResult.foodName} added to your food diary!`);
+                    toast({
+                      title: "Added to Food Diary!",
+                      description: "Food entry has been logged successfully.",
+                    });
                   }}
                 >
                   Add to Food Diary

@@ -1,10 +1,29 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Leaf, User, Bell } from 'lucide-react';
-import AuthModal from '@/components/AuthModal';
+import { Menu, X, Leaf, User, Bell, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/auth';
+import { useToast } from '@/hooks/use-toast';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out."
+      });
+    }
+  };
 
   return (
     <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b border-border">
@@ -23,7 +42,6 @@ const Header = () => {
             <a href="#home" className="text-foreground hover:text-primary transition-colors">Home</a>
             <a href="#scan" className="text-foreground hover:text-primary transition-colors">Food Scan</a>
             <a href="#dashboard" className="text-foreground hover:text-primary transition-colors">Dashboard</a>
-            <a href="#community" className="text-foreground hover:text-primary transition-colors">Community</a>
             <a href="#plans" className="text-foreground hover:text-primary transition-colors">Plans</a>
           </nav>
 
@@ -49,15 +67,19 @@ const Header = () => {
             >
               <User className="w-5 h-5" />
             </Button>
-            <AuthModal>
-              <Button 
-                variant="default" 
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => console.log('🚀 Get Started clicked')}
-              >
-                Get Started
-              </Button>
-            </AuthModal>
+            {user && (
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-muted-foreground">{user.email}</span>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={handleSignOut}
+                  title="Sign out"
+                >
+                  <LogOut className="w-5 h-5" />
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -75,16 +97,16 @@ const Header = () => {
             <a href="#home" className="block py-2 text-foreground hover:text-primary transition-colors">Home</a>
             <a href="#scan" className="block py-2 text-foreground hover:text-primary transition-colors">Food Scan</a>
             <a href="#dashboard" className="block py-2 text-foreground hover:text-primary transition-colors">Dashboard</a>
-            <a href="#community" className="block py-2 text-foreground hover:text-primary transition-colors">Community</a>
             <a href="#plans" className="block py-2 text-foreground hover:text-primary transition-colors">Plans</a>
-            <div className="pt-4 space-y-2">
-              <AuthModal>
-                <Button variant="outline" className="w-full">Sign In</Button>
-              </AuthModal>
-              <AuthModal>
-                <Button variant="default" className="w-full bg-primary hover:bg-primary/90">Get Started</Button>
-              </AuthModal>
-            </div>
+            {user && (
+              <div className="pt-4 space-y-2">
+                <div className="text-sm text-muted-foreground px-2">{user.email}</div>
+                <Button variant="outline" className="w-full" onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
